@@ -1,0 +1,18 @@
+{
+  "name": "autoytdownload",
+  "version": "1.0.0",
+  "description": "YT links Array downloader",
+  "main": "yt.js",
+  "scripts": {
+    "test": "node yt.js"
+  },
+  "keywords": [
+    "YouTube",
+    "downloader"
+  ],
+  "author": "HakkinDavid",
+  "license": "ISC",
+  "dependencies": {
+    "ytdl-core": "^4.3.0"
+  }
+}
