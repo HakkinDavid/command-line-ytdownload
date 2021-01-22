@@ -4,7 +4,7 @@
   "description": "YT links Array downloader",
   "main": "yt.js",
   "scripts": {
-    "test": "node yt.js"
+    "test": "npm i && node yt.js"
   },
   "keywords": [
     "YouTube",
