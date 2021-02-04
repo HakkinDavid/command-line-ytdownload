@@ -4,7 +4,7 @@
   "description": "YT links Array downloader",
   "main": "yt.js",
   "scripts": {
-    "test": "npm i && node yt.js"
+    "test": "npm i && npm upgrade && node yt.js"
   },
   "keywords": [
     "YouTube",
@@ -13,6 +13,6 @@
   "author": "HakkinDavid",
   "license": "ISC",
   "dependencies": {
-    "ytdl-core": "^4.3.0"
+    "ytdl-core": "^4.4.5"
   }
 }

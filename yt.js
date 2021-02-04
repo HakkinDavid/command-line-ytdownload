@@ -18,7 +18,16 @@ let videosArray = [];
 async function download(videos) {
   for (i=0; videos.length > i; i++) {
     let url = videos[i];
-    let info = await ytdl.getInfo(url).catch(console.error);
+    let probsError = false;
+    let info = await ytdl.getInfo(url).catch((err) => {
+      console.log("Fatal fetching error occured. Skipped: " + url);
+      console.log(err);
+      f++
+      probsError = true;
+    });
+    if (probsError) {
+      continue
+    }
     let name = info.videoDetails.title;
     name = name.replace(/\\|\/|\:|\*|\?|\"|\<|\>|\|/g, '');
     let wrtStrm = await fs.createWriteStream(dwnloadDir + name + ".mp3");
@@ -27,11 +36,13 @@ async function download(videos) {
       .on('error', (err) => {
         console.log("Couldn't get stream from " + url + " (" + name + ") with preferred quality.");
         console.log(err);
+        f++
       })
       .pipe(wrtStrm);
     wrtStrm.on('error', (err) => {
       console.log("Couldn't write file " + name);
       console.log(err);
+      f++
     });
     wrtStrm.on('finish', () => {
       console.log("Finished downloading " + name);
@@ -54,7 +65,7 @@ rl.on('close', async () => {
   await download(videosArray).catch(console.error);
   setInterval(() => {
     if (f == videosArray.length) {
-      console.log("All files have been successfully downloaded.");
+      console.log("All pending files have been successfully downloaded.");
       process.exit()
     }
   }, 1000);
