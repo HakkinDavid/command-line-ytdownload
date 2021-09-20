@@ -1,5 +1,7 @@
 const fs = require('fs');
 const ytdl = require('ytdl-core');
+const colors = require('colors');
+const stringSimilarity = require("string-similarity");
 const readline = require("readline");
 const rl = readline.createInterface({
     input: process.stdin,
@@ -8,12 +10,21 @@ const rl = readline.createInterface({
 
 let dwnloadDir = './downloaded/';
 
+let fetchFolder = './otherdownloads/';
+let mode;
+
 if (!fs.existsSync(dwnloadDir)){
     fs.mkdirSync(dwnloadDir);
 }
 
 let f = 0;
 let videosArray = [];
+let files = [];
+
+fs.readdirSync(fetchFolder).forEach(file => {
+  files.push(file.replace('.mp3', ''));
+  console.log(("(===) " + file.replace('.mp3', '')).green);
+});
 
 async function download(videos) {
   for (i=0; videos.length > i; i++) {
@@ -30,31 +41,48 @@ async function download(videos) {
     }
     let name = info.videoDetails.title;
     name = name.replace(/\\|\/|\:|\*|\?|\"|\<|\>|\|/g, '');
-    let wrtStrm = await fs.createWriteStream(dwnloadDir + name + ".mp3");
-    console.log("Downloading url " + url + " under filename " + name + ".mp3");
-    await ytdl.downloadFromInfo(info, { filter: 'audioonly', quality: 'highestaudio' })
-      .on('error', (err) => {
-        console.log("Couldn't get stream from " + url + " (" + name + ") with preferred quality.");
+    let matched = stringSimilarity.findBestMatch(name, files);
+    let percent = matched.bestMatch.rating*100;
+    let prcntStr = "(" + percent + "%) " + name + "\n\u200b[" + files[matched.bestMatchIndex] + "]";
+    if (percent >= 80) {
+      console.log((prcntStr).blue);
+    }
+    else if (percent >= 50) {
+      console.log((prcntStr).yellow);
+    }
+    else {
+      console.log((prcntStr).magenta);
+    }
+    if (percent < 50) {
+      let wrtStrm = await fs.createWriteStream(dwnloadDir + name + ".mp3");
+      console.log("Downloading url " + url + " under filename " + name + ".mp3");
+      await ytdl.downloadFromInfo(info, { filter: 'audioonly', quality: 'highestaudio' })
+        .on('error', (err) => {
+          console.log(("Couldn't get stream from " + url + " (" + name + ") with preferred quality.").red);
+          console.log(err);
+          f++
+        })
+        .pipe(wrtStrm);
+      wrtStrm.on('error', (err) => {
+        console.log(("(ERR) " + name).red);
         console.log(err);
         f++
+      });
+      wrtStrm.on('finish', () => {
+        console.log(("(+) " + name).green);
+        f++
       })
-      .pipe(wrtStrm);
-    wrtStrm.on('error', (err) => {
-      console.log("Couldn't write file " + name);
-      console.log(err);
+    }
+    else {
       f++
-    });
-    wrtStrm.on('finish', () => {
-      console.log("Finished downloading " + name);
-      f++
-    })
+    }
   }
 }
 
 console.log("Please input your URLs. Hit enter twice when you're done.");
 
 rl.on('line', (input) => {
-  if (input == '') {
+  if (input === '') {
     rl.emit('close');
     return
   }
@@ -64,7 +92,7 @@ rl.on('line', (input) => {
 rl.on('close', async () => {
   await download(videosArray).catch(console.error);
   setInterval(() => {
-    if (f == videosArray.length) {
+    if (f === videosArray.length) {
       console.log("All pending files have been successfully downloaded.");
       process.exit()
     }

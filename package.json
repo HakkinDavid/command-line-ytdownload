@@ -13,6 +13,8 @@
   "author": "HakkinDavid",
   "license": "ISC",
   "dependencies": {
+    "colors": "^1.4.0",
+    "string-similarity": "^4.0.4",
     "ytdl-core": "^4.4.5"
   }
 }
