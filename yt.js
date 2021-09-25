@@ -41,9 +41,10 @@ async function download(videos) {
     }
     let name = info.videoDetails.title;
     name = name.replace(/\\|\/|\:|\*|\?|\"|\<|\>|\|/g, '');
+    let percent = 0;
     if (files.length > 0) {
       let matched = stringSimilarity.findBestMatch(name, files);
-      let percent = matched.bestMatch.rating*100;
+      percent = matched.bestMatch.rating*100;
       let prcntStr = "(" + percent + "%) " + name + "\n\u200b[" + files[matched.bestMatchIndex] + "]";
       if (percent >= 80) {
         console.log((prcntStr).blue);
@@ -91,8 +92,7 @@ rl.on('line', (input) => {
   videosArray.push(input);
 })
 
-rl.on('close', async () => {
-  await download(videosArray).catch(console.error);
+rl.on('close', async () => 
   setInterval(() => {
     if (f === videosArray.length) {
       console.log("All pending files have been successfully downloaded.");
