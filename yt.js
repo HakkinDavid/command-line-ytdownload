@@ -41,19 +41,21 @@ async function download(videos) {
     }
     let name = info.videoDetails.title;
     name = name.replace(/\\|\/|\:|\*|\?|\"|\<|\>|\|/g, '');
-    let matched = stringSimilarity.findBestMatch(name, files);
-    let percent = matched.bestMatch.rating*100;
-    let prcntStr = "(" + percent + "%) " + name + "\n\u200b[" + files[matched.bestMatchIndex] + "]";
-    if (percent >= 80) {
-      console.log((prcntStr).blue);
+    if (files.length > 0) {
+      let matched = stringSimilarity.findBestMatch(name, files);
+      let percent = matched.bestMatch.rating*100;
+      let prcntStr = "(" + percent + "%) " + name + "\n\u200b[" + files[matched.bestMatchIndex] + "]";
+      if (percent >= 80) {
+        console.log((prcntStr).blue);
+      }
+      else if (percent >= 50) {
+        console.log((prcntStr).yellow);
+      }
+      else {
+        console.log((prcntStr).magenta);
+      }
     }
-    else if (percent >= 50) {
-      console.log((prcntStr).yellow);
-    }
-    else {
-      console.log((prcntStr).magenta);
-    }
-    if (percent < 50) {
+    if (files.length === 0 || percent < 50) {
       let wrtStrm = await fs.createWriteStream(dwnloadDir + name + ".mp3");
       console.log("Downloading url " + url + " under filename " + name + ".mp3");
       await ytdl.downloadFromInfo(info, { filter: 'audioonly', quality: 'highestaudio' })
